@@ -15,9 +15,10 @@ def main():
     print("DNS Listening on {0}:{1} ...".format(IP, PORT))
     while True:
         data, address = sock.recvfrom(650)
-        print("Request from {0}".format(address))
         d = DNSGen(data)
-        d.make_header()
+        sock.sendto(d.make_response(), address)
+        print("Request from {0} for {1}".format(address, d.domain))
+
 
 if __name__ == "__main__":
     main()
