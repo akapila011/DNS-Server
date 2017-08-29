@@ -11,7 +11,7 @@ The application requires Python 3.x to run (tested with version 3.6).
 To use the server there are 2 basic steps to follow:
 **step 1:**
 You must first generate a zone file. This is the file that stores the domain name and it's IP address mapping.
-To generate a zone file you must create a file with the following format: [domain name in reverse order].zone.
+To generate a zone file you must create a file with the following filename format: [domain name in reverse order].zone.
 Examples:
 - The zone file for www.google.com will be google.com.zone
 - The zone file for www.bing.co.uk will be bing.co.uk.zone
@@ -24,6 +24,7 @@ and change the relevant fields for your own mapping. In particular you will need
 - 'mname'
 - 'rname'
 - 'ns'
+**Ensure the domain names placed in the fields match with the filename to avoid errors**
 Finally the 'a' field holds 3 records for the IP address mapped to the domain name. 
 Ensure you change them to the correct IP address.
 
@@ -37,6 +38,20 @@ or else the server will not be able to run.
 
 Now you can change the network configurations on various machines that need to use this DNS server by specifying
 the IP address of the machine running the DNS server. 
+
+**Run:**
+To see an example run you can use the 'dig' command on Linux to see the response the server provides.
+- Start the server and ensure it is running before proceeding
+- Open a terminal and enter use the following command
+```sh
+$ dig xyz.com @127.0.0.1
+```
+You should receive a response for the domain xyz.com
+Once you have set your own zone file you can replace 'xyz.com' with your own domain name.
+You can change the IP address '127.0.0.1' to the IP address where the DNS server is running when you have it running
+on a remote machine on the network.
+**Note:** if you have updated your network configurations to use a specific IP for
+the dns server then there is no need to include the '@127.0.0.1' portion in the command.
 
 # Run tests
 
