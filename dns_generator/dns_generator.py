@@ -1,7 +1,6 @@
 import json
 import os
 
-
 QUESTION_TYPES = {
     b"\x00\x01": "a"
 }
@@ -11,8 +10,15 @@ ZONES = {}  # Holds hostname -> record data, cannot grow as server runs
 def load_zones():
     global ZONES
     json_zone = {}
-    for zone_file in os.listdir("Zones"):
-        with open(os.path.join("Zones", zone_file), "r") as f:
+    zones_path = "Zones"
+    files = []
+    try:
+        files = os.listdir(zones_path)
+    except FileNotFoundError:
+        zones_path = "..\Zones"
+        files = os.listdir(zones_path)
+    for zone_file in os.listdir(zones_path):
+        with open(os.path.join(zones_path, zone_file), "r") as f:
             data = json.load(f)
             zone_name = data["$origin"]
             json_zone[zone_name] = data
@@ -163,4 +169,4 @@ class DNSGen(object):
 
 
 if __name__ == "__main__":
-	pass
+    pass

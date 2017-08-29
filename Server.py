@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-import os
 import socket
-import json
 from dns_generator import DNSGen
 
 # Global variables
@@ -16,6 +14,7 @@ def main():
     while True:
         data, address = sock.recvfrom(650)
         d = DNSGen(data)
+        resp = d.make_response()
         sock.sendto(d.make_response(), address)
         print("Request from {0} for {1}".format(address, d.domain))
 
