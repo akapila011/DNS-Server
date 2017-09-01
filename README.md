@@ -1,7 +1,7 @@
-# My project's README
+# DNS Server
 <img src="https://hide.me/resources/156/images/no-dns-icon@2x.png" width="100" height="100">
 
-A Domain Name Server that allows you to generate your very own domain names to specified IP addresses.
+A Domain Name Server that allows you to use your own domain name IP address mappings.
 This could be used within private networks to simplify sharing of resources within the network.
 
 The application requires Python 3.x to run (tested with version 3.6).
@@ -9,13 +9,15 @@ The application requires Python 3.x to run (tested with version 3.6).
 # How to use
 
 To use the server there are 2 basic steps to follow:
-**step 1:**
+
+**Step 1:**
 You must first generate a zone file. This is the file that stores the domain name and it's IP address mapping.
 To generate a zone file you must create a file with the following filename format: [domain name in reverse order].zone.
 Examples:
 - The zone file for www.google.com will be google.com.zone
 - The zone file for www.bing.co.uk will be bing.co.uk.zone
 - The zone file for www.university.ac.co will be university.ac.co.zone
+
 **Ensure the file has a '.zone' extension rather than .txt or any other extension**
 
 An example zone file is provided in the project. You can simply copy the detail inside
@@ -24,11 +26,12 @@ and change the relevant fields for your own mapping. In particular you will need
 - 'mname'
 - 'rname'
 - 'ns'
+
 **Ensure the domain names placed in the fields match with the filename to avoid errors**
 Finally the 'a' field holds 3 records for the IP address mapped to the domain name. 
 Ensure you change them to the correct IP address.
 
-**step 2:**
+**Step 2:**
 Once the zone file is created and placed in the 'Zones' directory you can start the server.
 No special modifications are needed to run the server. You can simply run the 'Server.py' file.
 **Ensure that you run the 'Server.py' with the necessary privileges required for the program to access network resources.**
@@ -40,6 +43,7 @@ Now you can change the network configurations on various machines that need to u
 the IP address of the machine running the DNS server. 
 
 **Run:**
+
 To see an example run you can use the 'dig' command on Linux to see the response the server provides.
 - Start the server and ensure it is running before proceeding
 - Open a terminal and enter use the following command
@@ -50,6 +54,7 @@ You should receive a response for the domain xyz.com
 Once you have set your own zone file you can replace 'xyz.com' with your own domain name.
 You can change the IP address '127.0.0.1' to the IP address where the DNS server is running when you have it running
 on a remote machine on the network.
+
 **Note:** if you have updated your network configurations to use a specific IP for
 the dns server then there is no need to include the '@127.0.0.1' portion in the command.
 
