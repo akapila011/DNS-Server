@@ -61,3 +61,5 @@ to the project directory (i.e. 'DNS Server') and then run following command:
 ```sh
 $ python3 -m unittest
 ```
+
+<a href="https://app.codesponsor.io/link/F7562BGJ3YiAu5CBEEerdT66/akapila011/DNS-Server" rel="nofollow"><img src="https://app.codesponsor.io/embed/F7562BGJ3YiAu5CBEEerdT66/akapila011/DNS-Server.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
