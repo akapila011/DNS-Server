@@ -21,14 +21,15 @@ def load_zones():
         with open(os.path.join(zones_path, zone_file), "r") as f:
             data = json.load(f)
             zone_name = data["$origin"]
+            print("Loaded zone:",zone_name)
             json_zone[zone_name] = data
     return json_zone
 ZONES = load_zones()
 
 
-def get_zone(domain):
+def get_zone(domain_parts):
         global ZONES
-        zone_name = ".".join(domain)
+        zone_name = ".".join(domain_parts[-3:])[:-1] #only the last 3 elements (second level domain) and remove last dot
         zone = {}
         try:
             zone = ZONES[zone_name]
@@ -88,6 +89,7 @@ class DNSGen(object):
                         domain_parts.append(domain_string)
                         domain_string = ""
                         state = 0   # ensure that next loop captures the byte length of the next label
+                        x = 0
                     if byte == 0:   # Check if we have reached the end of the question domain
                         domain_parts.append(domain_string)
                         break
@@ -103,7 +105,7 @@ class DNSGen(object):
             return domain_parts, question_type
 
     def _get_records(self, data):
-        domain, question_type = self._get_question_domain_type(data)
+        domain_parts, question_type = self._get_question_domain_type(data)
         if question_type is None and len(domain) == 0:
             return {}, "", ""
         qt = ""
@@ -111,10 +113,10 @@ class DNSGen(object):
             qt = QUESTION_TYPES[question_type]
         except KeyError:
             qt = "a"
-        zone = get_zone(domain)
+        zone = get_zone(domain_parts)
         if zone is None:
-            return [], qt, domain   # empty list ensure a domain we don't have returns correct data
-        return zone[qt], qt, domain
+            return [], qt, domain_parts   # empty list ensure a domain we don't have returns correct data
+        return zone[qt], qt, domain_parts
 
     @staticmethod
     def _record_to_bytes(domain_name, record_type, record_ttl, record_value):
@@ -139,6 +141,7 @@ class DNSGen(object):
         flags = self._generate_flags()  # relies on state variable self.RCODE, which modified above if appropriate
         return transaction_id + flags + self.QDCOUNT + ancount + self.NSCOUNT + self.ARCOUNT
 
+    #generate the question section, only one record
     def _make_question(self, records_length, record_type, domain_name):
         resp = b""
         if self.format_error == 1:
@@ -148,23 +151,56 @@ class DNSGen(object):
             resp += bytes([length])
             for char in part:
                 resp += ord(char).to_bytes(1, byteorder="big")
-        resp += b"\x00"    # end labels
         if record_type == "a":
-            resp += (1).to_bytes(2, byteorder="big")
-        resp += (1).to_bytes(2, byteorder="big")
+            resp += (1).to_bytes(2, byteorder="big") #record type A = 0001
+        resp += (1).to_bytes(2, byteorder="big") #class IN = 0001
         return resp
 
+    #Count how many records of the zone matches the requested subdomain.
+    #If the request concerns a second level domain, search for @ entries.
+    def count_matching_records(self, records, domain_name):
+        if len(records)==0:
+            return 0
+        count = 0
+        if len(domain_name) == 3:
+            search = "@"
+        elif len(domain_name) == 4:
+            search = domain_name[0]
+        else:
+            #subsub.sub.domain.tld not supported yet
+            #usually zones are not recursive and allow elements with dots to simulate subsubs
+            return 0
+
+        for record in records:
+            if record['name'] == search:
+                count += 1
+
+        return count
+
+    #Compose the answer section. Only matching records are returned.
     def _make_answer(self, records, record_type, domain_name):
         resp = b""
         if len(records) == 0 or self.format_error == 1:
             return resp
+        if len(domain_name) == 3:
+            search = "@"
+        elif len(domain_name) == 4:
+            search = domain_name[0]
+        else:
+            #subsub.sub/domain.tld not supported yet
+            return resp
+
         for record in records:
-            resp += self._record_to_bytes(domain_name, record_type, record["ttl"], record["value"])
+            if record["name"] == search:
+                resp += self._record_to_bytes(domain_name, record_type, record["ttl"], record["value"])
+
         return resp
 
     def make_response(self):
         records, record_type, domain_name = self._get_records(self.data[12:])
-        return self._make_header(len(records)) + self._make_question(len(records), record_type, domain_name) +\
+        cnt = self.count_matching_records(records, domain_name)
+        return cnt, self._make_header(cnt) +\
+               self._make_question(1, record_type, domain_name) +\
                self._make_answer(records, record_type, domain_name)
 
 
